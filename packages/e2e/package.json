@@ -1,0 +1,26 @@
+{
+  "name": "@shiftsync/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "cy:run:auth": "cypress run --spec 'cypress/e2e/auth/**'",
+    "cy:run:nav": "cypress run --spec 'cypress/e2e/nav/**'",
+    "cy:run:users": "cypress run --spec 'cypress/e2e/users/**'",
+    "cy:run:availability": "cypress run --spec 'cypress/e2e/availability/**'",
+    "cy:run:schedule": "cypress run --spec 'cypress/e2e/schedule/**'",
+    "cy:run:shifts": "cypress run --spec 'cypress/e2e/shifts/**'",
+    "cy:run:constraints": "cypress run --spec 'cypress/e2e/constraints/**'",
+    "cy:run:swap-requests": "cypress run --spec 'cypress/e2e/swap-requests/**'",
+    "cy:run:dashboard": "cypress run --spec 'cypress/e2e/dashboard/**'",
+    "cy:run:analytics": "cypress run --spec 'cypress/e2e/analytics/**'",
+    "cy:run:audit": "cypress run --spec 'cypress/e2e/audit/**'",
+    "cy:run:realtime": "cypress run --spec 'cypress/e2e/realtime/**'",
+    "cy:run:on-duty": "cypress run --spec 'cypress/e2e/on-duty/**'",
+    "cy:run:api": "cypress run --spec 'cypress/e2e/api/**'"
+  },
+  "devDependencies": {
+    "cypress": "^13.17.0"
+  }
+}

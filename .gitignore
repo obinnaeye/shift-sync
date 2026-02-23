@@ -1,0 +1,62 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Build outputs ─────────────────────────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+out/
+packages/shared/dist/
+
+# ── Environment files (never commit secrets) ──────────────────────────────────
+.env
+.env.*
+# Allow example files so teammates can bootstrap
+!.env.example
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ── Prisma ────────────────────────────────────────────────────────────────────
+# Generated Prisma client (recreated by `prisma generate`)
+packages/backend/src/generated/
+packages/backend/generated/
+
+# ── Cypress E2E ───────────────────────────────────────────────────────────────
+packages/e2e/cypress/videos/
+packages/e2e/cypress/screenshots/
+
+# ── TypeScript ────────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Test coverage ─────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── OS artifacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor / IDE ──────────────────────────────────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+.idea/
+.cursor/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+.cache/
+.turbo/
+.eslintcache

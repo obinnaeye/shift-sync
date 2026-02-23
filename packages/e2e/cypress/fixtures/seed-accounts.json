@@ -1,0 +1,11 @@
+{
+  "ADMIN":  { "email": "admin@shiftsync.local",         "password": "ChangeMe123!",  "role": "ADMIN",   "firstName": "Admin",  "lastName": "User"     },
+  "MGR_LA": { "email": "alice.manager@shiftsync.local",  "password": "Manager1234!", "role": "MANAGER", "firstName": "Alice",  "lastName": "Nguyen"   },
+  "MGR_FL": { "email": "bob.manager@shiftsync.local",    "password": "Manager1234!", "role": "MANAGER", "firstName": "Bob",    "lastName": "Martin"   },
+  "CAROL":  { "email": "carol.smith@shiftsync.local",    "password": "Staff1234!",   "role": "STAFF",   "firstName": "Carol",  "lastName": "Smith"    },
+  "EMMA":   { "email": "emma.williams@shiftsync.local",  "password": "Staff1234!",   "role": "STAFF",   "firstName": "Emma",   "lastName": "Williams" },
+  "HENRY":  { "email": "henry.wilson@shiftsync.local",   "password": "Staff1234!",   "role": "STAFF",   "firstName": "Henry",  "lastName": "Wilson"   },
+  "FRANK":  { "email": "frank.brown@shiftsync.local",    "password": "Staff1234!",   "role": "STAFF",   "firstName": "Frank",  "lastName": "Brown"    },
+  "GRACE":  { "email": "grace.davis@shiftsync.local",    "password": "Staff1234!",   "role": "STAFF",   "firstName": "Grace",  "lastName": "Davis"    },
+  "DAVID":  { "email": "david.jones@shiftsync.local",    "password": "Staff1234!",   "role": "STAFF",   "firstName": "David",  "lastName": "Jones"    }
+}

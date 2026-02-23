@@ -1,0 +1,17 @@
+{
+  "name": "shiftsync",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.22.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+
+    "test:e2e": "pnpm --filter @shiftsync/backend db:reset:test && pnpm --filter @shiftsync/e2e cy:run",
+    "test:e2e:open": "pnpm --filter @shiftsync/e2e cy:open",
+
+    "test:backend": "dotenv -e packages/backend/.env.test -- tsx packages/backend/src/server.ts"
+  }
+}

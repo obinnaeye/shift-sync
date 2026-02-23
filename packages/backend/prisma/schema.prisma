@@ -1,0 +1,286 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String                     @id @default(uuid())
+  email              String                     @unique
+  passwordHash       String                     @map("password_hash")
+  firstName          String                     @map("first_name")
+  lastName           String                     @map("last_name")
+  role               Role                       @default(STAFF)
+  phone              String?
+  desiredWeeklyHours Int?                       @map("desired_weekly_hours")
+  isActive           Boolean                    @default(true) @map("is_active")
+  createdAt          DateTime                   @default(now()) @db.Timestamptz @map("created_at")
+  updatedAt          DateTime                   @updatedAt @db.Timestamptz @map("updated_at")
+  managedLocations   LocationManager[]
+  certifications     LocationCertification[]
+  skills             UserSkill[]
+  availabilities     Availability[]
+  assignments        ShiftAssignment[]
+  sentSwapRequests   SwapRequest[]              @relation("Requester")
+  receivedSwapReqs   SwapRequest[]              @relation("Target")
+  notifications      Notification[]
+  notifPreferences   NotificationPreference?
+  auditLogs          AuditLog[]                 @relation("AuditActor")
+  availabilityExceptions AvailabilityException[]
+  managerOverridesMade ManagerOverride[]        @relation("OverrideManager")
+  managerOverridesFor  ManagerOverride[]        @relation("OverrideStaff")
+  shiftsCreated      Shift[]                    @relation("ShiftCreator")
+  assignmentsCreated ShiftAssignment[]          @relation("AssignmentCreator")
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+model Location {
+  id             String                  @id @default(uuid())
+  name           String
+  address        String
+  timezone       String
+  isActive       Boolean                 @default(true) @map("is_active")
+  createdAt      DateTime                @default(now()) @db.Timestamptz @map("created_at")
+  managers       LocationManager[]
+  certifications LocationCertification[]
+  shifts         Shift[]
+
+  @@map("locations")
+}
+
+model LocationManager {
+  userId     String @map("user_id")
+  locationId String @map("location_id")
+  user       User   @relation(fields: [userId], references: [id])
+  location   Location @relation(fields: [locationId], references: [id])
+
+  @@id([userId, locationId])
+  @@map("location_managers")
+}
+
+model LocationCertification {
+  userId      String   @map("user_id")
+  locationId  String   @map("location_id")
+  certifiedAt DateTime @default(now()) @db.Timestamptz @map("certified_at")
+  revokedAt   DateTime? @db.Timestamptz @map("revoked_at")
+  user        User     @relation(fields: [userId], references: [id])
+  location    Location @relation(fields: [locationId], references: [id])
+
+  @@id([userId, locationId])
+  @@map("location_certifications")
+}
+
+model Skill {
+  id     String  @id @default(uuid())
+  name   String  @unique
+  users  UserSkill[]
+  shifts Shift[]
+
+  @@map("skills")
+}
+
+model UserSkill {
+  userId  String @map("user_id")
+  skillId String @map("skill_id")
+  user    User   @relation(fields: [userId], references: [id])
+  skill   Skill  @relation(fields: [skillId], references: [id])
+
+  @@id([userId, skillId])
+  @@map("user_skills")
+}
+
+model Availability {
+  id          String  @id @default(uuid())
+  userId      String  @map("user_id")
+  dayOfWeek   Int     @map("day_of_week")
+  startTime   String  @map("start_time")
+  endTime     String  @map("end_time")
+  timezone    String
+  isRecurring Boolean @default(true) @map("is_recurring")
+  user        User    @relation(fields: [userId], references: [id])
+
+  @@map("availabilities")
+}
+
+model AvailabilityException {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  date        DateTime @db.Date
+  startTime   String?  @map("start_time")
+  endTime     String?  @map("end_time")
+  isAvailable Boolean  @map("is_available")
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("availability_exceptions")
+}
+
+model Shift {
+  id          String          @id @default(uuid())
+  locationId  String          @map("location_id")
+  skillId     String          @map("skill_id")
+  startTime   DateTime        @db.Timestamptz @map("start_time")
+  endTime     DateTime        @db.Timestamptz @map("end_time")
+  headcount   Int
+  isPremium   Boolean         @default(false) @map("is_premium")
+  status      ShiftStatus     @default(DRAFT)
+  scheduleWeek DateTime       @db.Date @map("schedule_week")
+  publishedAt DateTime?       @db.Timestamptz @map("published_at")
+  editCutoffAt DateTime?      @db.Timestamptz @map("edit_cutoff_at")
+  createdBy   String          @map("created_by")
+  createdAt   DateTime        @default(now()) @db.Timestamptz @map("created_at")
+  updatedAt   DateTime        @updatedAt @db.Timestamptz @map("updated_at")
+  location    Location        @relation(fields: [locationId], references: [id])
+  skill       Skill           @relation(fields: [skillId], references: [id])
+  assignments ShiftAssignment[]
+  auditLogs   AuditLog[]      @relation("AuditShift")
+  creator     User            @relation("ShiftCreator", fields: [createdBy], references: [id])
+  managerOverrides ManagerOverride[]
+
+  @@map("shifts")
+}
+
+enum ShiftStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+}
+
+model ShiftAssignment {
+  id             String           @id @default(uuid())
+  shiftId        String           @map("shift_id")
+  userId         String           @map("user_id")
+  assignedBy     String           @map("assigned_by")
+  assignedAt     DateTime         @default(now()) @db.Timestamptz @map("assigned_at")
+  status         AssignmentStatus @default(CONFIRMED)
+  shiftStartTime DateTime         @db.Timestamptz @map("shift_start_time")
+  shiftEndTime   DateTime         @db.Timestamptz @map("shift_end_time")
+  shift          Shift            @relation(fields: [shiftId], references: [id])
+  user           User             @relation(fields: [userId], references: [id])
+  swapRequest    SwapRequest?
+  assignedByUser User             @relation("AssignmentCreator", fields: [assignedBy], references: [id])
+
+  @@unique([shiftId, userId])
+  @@map("shift_assignments")
+}
+
+enum AssignmentStatus {
+  CONFIRMED
+  DROPPED
+  SWAPPED
+}
+
+model SwapRequest {
+  id                String       @id @default(uuid())
+  type              SwapType
+  requesterId       String       @map("requester_id")
+  targetId          String?      @map("target_id")
+  assignmentId      String       @unique @map("assignment_id")
+  status            SwapStatus
+  managerApprovedBy String?      @map("manager_approved_by")
+  managerNote       String?      @map("manager_note")
+  expiresAt         DateTime?    @db.Timestamptz @map("expires_at")
+  pickupAttempts    Int          @default(0) @map("pickup_attempts")
+  createdAt         DateTime     @default(now()) @db.Timestamptz @map("created_at")
+  updatedAt         DateTime     @updatedAt @db.Timestamptz @map("updated_at")
+  requester         User         @relation("Requester", fields: [requesterId], references: [id])
+  target            User?        @relation("Target", fields: [targetId], references: [id])
+  assignment        ShiftAssignment @relation(fields: [assignmentId], references: [id])
+
+  @@map("swap_requests")
+}
+
+enum SwapType {
+  SWAP
+  DROP
+}
+
+enum SwapStatus {
+  PENDING_ACCEPTANCE
+  OPEN
+  PENDING_MANAGER
+  APPROVED
+  REJECTED
+  CANCELLED
+  EXPIRED
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  body      String
+  metadata  Json
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @db.Timestamptz @map("created_at")
+  user      User             @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  SHIFT_ASSIGNED
+  SHIFT_CHANGED
+  SHIFT_CANCELLED
+  SCHEDULE_PUBLISHED
+  SWAP_REQUEST_RECEIVED
+  SWAP_REQUEST_ACCEPTED
+  SWAP_REQUEST_REJECTED
+  SWAP_REQUEST_CANCELLED
+  SWAP_APPROVED
+  DROP_REQUEST_RECEIVED
+  DROP_AVAILABLE
+  OVERTIME_WARNING
+  AVAILABILITY_CHANGED
+}
+
+model NotificationPreference {
+  userId String  @id @map("user_id")
+  inApp  Boolean @default(true) @map("in_app")
+  email  Boolean @default(false)
+  user   User    @relation(fields: [userId], references: [id])
+
+  @@map("notification_preferences")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String   @map("actor_id")
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  action     String
+  before     Json?
+  after      Json?
+  reason     String?
+  shiftId    String?  @map("shift_id")
+  createdAt  DateTime @default(now()) @db.Timestamptz @map("created_at")
+  actor      User     @relation("AuditActor", fields: [actorId], references: [id])
+  shift      Shift?   @relation("AuditShift", fields: [shiftId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model ManagerOverride {
+  id           String   @id @default(uuid())
+  managerId    String   @map("manager_id")
+  userId       String   @map("user_id")
+  overrideType String   @map("override_type")
+  shiftId      String   @map("shift_id")
+  reason       String
+  createdAt    DateTime @default(now()) @db.Timestamptz @map("created_at")
+  manager      User     @relation("OverrideManager", fields: [managerId], references: [id])
+  user         User     @relation("OverrideStaff", fields: [userId], references: [id])
+  shift        Shift    @relation(fields: [shiftId], references: [id])
+
+  @@map("manager_overrides")
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@shiftsync/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "echo \"No lint configured for shared\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
