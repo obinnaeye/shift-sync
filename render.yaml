@@ -1,0 +1,73 @@
+# Render Blueprint — ShiftSync Backend
+# https://render.com/docs/blueprint-spec
+#
+# This deploys a single web service that runs both the HTTP API
+# and the BullMQ worker in the same Node.js process (free-tier friendly).
+#
+# Prerequisites:
+#   - Neon PostgreSQL connection string set as DATABASE_URL
+#   - Upstash Redis connection string set as REDIS_URL
+#
+# Free tier limits:
+#   - Web service sleeps after 15 min of inactivity
+#   - First request after sleep takes ~30–60 s (cold start)
+#   - 750 h/month runtime
+
+services:
+  - type: web
+    name: shiftsync-api
+    runtime: node
+    region: oregon  # or frankfurt for EU
+    plan: free
+
+    # pnpm is available via corepack on Render's Node 20 image
+    buildCommand: >
+      corepack enable &&
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @shiftsync/shared build &&
+      pnpm --filter @shiftsync/backend build &&
+      cd packages/backend && npx prisma generate
+
+    startCommand: cd packages/backend && npx prisma migrate deploy && node dist/server.js
+
+    healthCheckPath: /healthz
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # ── Secrets — set these in Render dashboard or via `render env set` ──────
+      - key: DATABASE_URL
+        sync: false  # marks as secret; you set the value in the dashboard
+
+      - key: REDIS_URL
+        sync: false
+
+      - key: JWT_ACCESS_SECRET
+        generateValue: true  # Render auto-generates a random secret
+
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+      - key: CSRF_SECRET
+        generateValue: true
+
+      # ── Public values ─────────────────────────────────────────────────────────
+      - key: PORT
+        value: "4000"
+
+      # Set this to your Vercel frontend URL after deploying the frontend
+      - key: FRONTEND_URL
+        value: https://shiftsync.vercel.app  # replace with your actual URL
+
+      # Optional: comma-separated list of additional allowed origins for dev
+      - key: DEV_FRONTEND_URLS
+        value: ""
+
+      # Access token TTL (15 minutes)
+      - key: ACCESS_TOKEN_TTL
+        value: "900"
+
+      # Refresh token TTL in seconds (7 days)
+      - key: REFRESH_TOKEN_TTL
+        value: "604800"
