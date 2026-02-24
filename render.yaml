@@ -28,7 +28,7 @@ services:
       pnpm --filter @shiftsync/backend prisma:generate &&
       pnpm --filter @shiftsync/backend build
 
-    startCommand: cd packages/backend && npx prisma migrate deploy && node dist/server.js
+    startCommand: cd packages/backend && npx prisma migrate deploy && node dist/src/server.js
 
     healthCheckPath: /healthz
 

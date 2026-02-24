@@ -58,4 +58,4 @@ COPY package.json pnpm-workspace.yaml ./
 EXPOSE 4000
 
 # Run migrations then start server
-CMD ["sh", "-c", "cd packages/backend && npx prisma migrate deploy && node dist/server.js"]
+CMD ["sh", "-c", "cd packages/backend && npx prisma migrate deploy && node dist/src/server.js"]
