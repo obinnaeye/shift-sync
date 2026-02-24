@@ -10,13 +10,19 @@ const POLL_JOB_NAME = "poll-open-drops";
 const SYSTEM_EXPIRE_REASON = "Auto-expired by BullMQ worker";
 
 const redisUrl = new URL(env.REDIS_URL);
+const isTls = env.REDIS_URL.startsWith("rediss://");
 const redisConnection = {
   host: redisUrl.hostname,
   port: Number(redisUrl.port || 6379),
   username: redisUrl.username || undefined,
   password: redisUrl.password || undefined,
   db: redisUrl.pathname ? Number(redisUrl.pathname.slice(1) || "0") : 0,
+  // Required for BullMQ + Upstash: null = no request timeout (long-poll jobs)
   maxRetriesPerRequest: null as null,
+  // Required for Upstash serverless Redis
+  enableReadyCheck: false,
+  // TLS for rediss:// connections
+  tls: isTls ? { rejectUnauthorized: false } : undefined,
 };
 
 const queue = new Queue(QUEUE_NAME, { connection: redisConnection });

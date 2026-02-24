@@ -8,7 +8,11 @@ import { initSocketServer } from "./realtime/socket.js";
 
 async function bootstrap() {
   await prisma.$connect();
-  await redis.ping();
+  // Ping Redis but don't crash if it's momentarily unavailable on startup;
+  // ioredis will reconnect automatically and the /readyz endpoint tracks health.
+  await redis.ping().catch((err: Error) => {
+    console.warn("[redis] Initial ping failed, will retry automatically:", err.message);
+  });
   const httpServer = createServer(app);
   await initSocketServer(httpServer);
   await initDropExpiryWorker();
