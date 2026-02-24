@@ -51,9 +51,9 @@ jobs:
         run: pnpm --filter @shiftsync/shared build
 
       - name: Generate Prisma client
-        run: pnpm --filter @shiftsync/backend exec prisma generate
+        run: pnpm --filter @shiftsync/backend prisma:generate
         env:
-          # Prisma generate only needs the provider, not a real DB
+          # Prisma generate only needs the provider, not a live DB
           DATABASE_URL: postgresql://user:pass@localhost:5432/shiftsync
 
       - name: Typecheck (all packages)

@@ -25,8 +25,8 @@ services:
       corepack enable &&
       pnpm install --frozen-lockfile &&
       pnpm --filter @shiftsync/shared build &&
-      pnpm --filter @shiftsync/backend build &&
-      cd packages/backend && npx prisma generate
+      pnpm --filter @shiftsync/backend prisma:generate &&
+      pnpm --filter @shiftsync/backend build
 
     startCommand: cd packages/backend && npx prisma migrate deploy && node dist/server.js
 
